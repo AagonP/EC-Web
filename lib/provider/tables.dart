@@ -40,36 +40,41 @@ class TablesProvider with ChangeNotifier {
 
   List<DatatableHeader> ordersTableHeader = [
     DatatableHeader(
-        text: "ID",
-        value: "id",
-        show: false,
-        sortable: true,
-        textAlign: TextAlign.left),
-    DatatableHeader(
-        text: "User Id",
-        value: "userId",
+        text: "Nonce",
+        value: "nonce",
         show: true,
-        flex: 2,
         sortable: true,
-        textAlign: TextAlign.left),
+        textAlign: TextAlign.center),
     DatatableHeader(
         text: "Description",
         value: "description",
         show: true,
         sortable: true,
-        textAlign: TextAlign.left),
+        textAlign: TextAlign.center),
     DatatableHeader(
-        text: "Created At",
-        value: "createdAt",
+        text: "Payment type",
+        value: "payment_type",
         show: true,
         sortable: true,
-        textAlign: TextAlign.left),
+        textAlign: TextAlign.center),
     DatatableHeader(
-        text: "Total",
-        value: "total",
+        text: "Created time",
+        value: "created_time",
         show: true,
         sortable: true,
-        textAlign: TextAlign.left),
+        textAlign: TextAlign.center),
+    DatatableHeader(
+        text: "Is processed",
+        value: "is_processed",
+        show: true,
+        sortable: true,
+        textAlign: TextAlign.center),
+    DatatableHeader(
+        text: "Amount",
+        value: "amount",
+        show: true,
+        sortable: true,
+        textAlign: TextAlign.center),
   ];
 
   List<DatatableHeader> productsTableHeader = [
@@ -223,15 +228,29 @@ class TablesProvider with ChangeNotifier {
   BrandsServices _brandsServices = BrandsServices();
   List<BrandModel> _brands = <BrandModel>[];
 
+  Future refreshReceipts() async {
+    _orders = await _orderServices.getAllOrders();
+    ordersTableSource.clear();
+    ordersTableSource.addAll(_getOrdersData());
+    notifyListeners();
+  }
+
+  Future getSearchResultByDate(String date) async {
+    _orders = await _orderServices.getAllOrdersByDate(date);
+    ordersTableSource.clear();
+    ordersTableSource.addAll(_getOrdersData());
+    notifyListeners();
+  }
+
   Future _loadFromFirebase() async {
     // _users = await _userServices.getAllUsers();
-    // _orders = await _orderServices.getAllOrders();
+    _orders = await _orderServices.getAllOrders();
     // _products = await _productsServices.getAllProducts();
     _brands = await _brandsServices.getAll();
     // _categories = await _categoriesServices.getAll();
   }
 
-  void addStoreData(BrandModel brandModel) async{
+  void addStoreData(BrandModel brandModel) async {
     /// add store to database
     await _brandsServices.addStore(brandModel);
     _brands.clear();
@@ -255,7 +274,7 @@ class TablesProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  void updateStoreDate(String id, BrandModel brandModel) async{
+  void updateStoreDate(String id, BrandModel brandModel) async {
     /// Update selected item
     _brands.clear();
     brandsTableSource.clear();
@@ -317,12 +336,12 @@ class TablesProvider with ChangeNotifier {
     List<Map<String, dynamic>> temps = List<Map<String, dynamic>>();
     for (OrderModel order in _orders) {
       temps.add({
-        "id": order.id,
-        "userId": order.userId,
+        "nonce": order.nonce,
+        "amount": order.amount,
         "description": order.description,
-        "createdAt": DateFormat.yMMMd()
-            .format(DateTime.fromMillisecondsSinceEpoch(order.createdAt)),
-        "total": "\$${order.total}",
+        "is_processed": order.is_processed,
+        "created_time": order.created_time,
+        "payment_type": order.payment_time,
       });
     }
     return temps;

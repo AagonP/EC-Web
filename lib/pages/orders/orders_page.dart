@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:ecommerce_admin_tut/provider/auth.dart';
 import 'package:ecommerce_admin_tut/provider/tables.dart';
 import 'package:ecommerce_admin_tut/widgets/page_header.dart';
 import 'package:flutter/material.dart';
@@ -13,124 +14,9 @@ class OrdersPage extends StatefulWidget {
 }
 
 class _OrdersPageState extends State<OrdersPage> {
-  List<DatatableHeader> _headers = [
-    DatatableHeader(
-        text: "ID",
-        value: "id",
-        show: false,
-        sortable: true,
-        textAlign: TextAlign.right),
-    DatatableHeader(
-        text: "Name",
-        value: "name",
-        show: true,
-        flex: 2,
-        sortable: true,
-        textAlign: TextAlign.left),
-    DatatableHeader(
-        text: "SKU",
-        value: "sku",
-        show: true,
-        sortable: true,
-        textAlign: TextAlign.center),
-    DatatableHeader(
-        text: "Category",
-        value: "category",
-        show: true,
-        sortable: true,
-        textAlign: TextAlign.left),
-    DatatableHeader(
-        text: "Price",
-        value: "price",
-        show: true,
-        sortable: true,
-        textAlign: TextAlign.left),
-    DatatableHeader(
-        text: "Margin",
-        value: "margin",
-        show: true,
-        sortable: true,
-        textAlign: TextAlign.left),
-    DatatableHeader(
-        text: "In Stock",
-        value: "in_stock",
-        show: true,
-        sortable: true,
-        textAlign: TextAlign.left),
-    DatatableHeader(
-        text: "Alert",
-        value: "alert",
-        show: true,
-        sortable: true,
-        textAlign: TextAlign.left),
-    DatatableHeader(
-        text: "Received",
-        value: "received",
-        show: true,
-        sortable: false,
-        sourceBuilder: (value, row) {
-          List list = List.from(value);
-          return Container(
-            child: Column(
-              children: [
-                Container(
-                  width: 85,
-                  child: LinearProgressIndicator(
-                    value: list.first / list.last,
-                  ),
-                ),
-                Text("${list.first} of ${list.last}")
-              ],
-            ),
-          );
-        },
-        textAlign: TextAlign.center),
-  ];
-
-  List<int> _perPages = [5, 10, 15, 100];
-  int _total = 100;
-  int _currentPerPage;
-  int _currentPage = 1;
-  bool _isSearch = false;
   List<Map<String, dynamic>> _source = List<Map<String, dynamic>>();
-  List<Map<String, dynamic>> _selecteds = List<Map<String, dynamic>>();
-  String _selectableKey = "id";
 
-  String _sortColumn;
-  bool _sortAscending = true;
-  bool _isLoading = true;
-  bool _showSelect = true;
-
-  List<Map<String, dynamic>> _generateData({int n: 100}) {
-    final List source = List.filled(n, Random.secure());
-    List<Map<String, dynamic>> temps = List<Map<String, dynamic>>();
-    var i = _source.length;
-    print(i);
-    for (var data in source) {
-      temps.add({
-        "id": i,
-        "sku": "$i\000$i",
-        "name": "Product Product Product Product $i",
-        "category": "Category-$i",
-        "price": "${i}0.00",
-        "cost": "20.00",
-        "margin": "${i}0.20",
-        "in_stock": "${i}0",
-        "alert": "5",
-        "received": [i + 20, 150]
-      });
-      i++;
-    }
-    return temps;
-  }
-
-  _initData() async {
-    setState(() => _isLoading = true);
-    Future.delayed(Duration(seconds: 2)).then((value) {
-      _source.addAll(_generateData(n: 1000));
-      setState(() => _isLoading = false);
-    });
-  }
+  _initData() async {}
 
   @override
   void initState() {
@@ -152,7 +38,19 @@ class _OrdersPageState extends State<OrdersPage> {
             mainAxisSize: MainAxisSize.max,
             children: [
           PageHeader(
-            text: 'Orders',
+            text: 'Receipts',
+          ),
+          Container(
+            margin: EdgeInsets.all(20),
+            padding: EdgeInsets.all(0),
+            alignment: Alignment.centerLeft,
+            child: IconButton(
+              icon: const Icon(Icons.refresh),
+              color: Colors.black,
+              onPressed: () {
+                tablesProvider.refreshReceipts();
+              },
+            ),
           ),
           Container(
             margin: EdgeInsets.all(10),
@@ -165,16 +63,14 @@ class _OrdersPageState extends State<OrdersPage> {
               shadowColor: Colors.black,
               clipBehavior: Clip.none,
               child: ResponsiveDatatable(
-                title: !tablesProvider.isSearch
-                    ? RaisedButton.icon(
-                        onPressed: () {},
-                        icon: Icon(Icons.add),
-                        label: Text("ADD CATEGORY"))
-                    : null,
+                title: null,
                 actions: [
                   if (tablesProvider.isSearch)
                     Expanded(
                         child: TextField(
+                      onSubmitted: (value) {
+                        tablesProvider.getSearchResultByDate(value);
+                      },
                       decoration: InputDecoration(
                           prefixIcon: IconButton(
                               icon: Icon(Icons.cancel),
