@@ -38,8 +38,8 @@ class SideMenuTabletDesktop extends StatelessWidget {
               },
             ),
             SideMenuItemDesktop(
-              icon: Icons.people,
-              text: 'Users',
+              icon: Icons.food_bank,
+              text: 'Foods',
               active: appProvider.currentPage == DisplayedPage.USERS,
               onTap: () {
                 appProvider.changeCurrentPage(DisplayedPage.USERS);
@@ -58,25 +58,17 @@ class SideMenuTabletDesktop extends StatelessWidget {
             ),
             SideMenuItemDesktop(
               icon: Icons.shopping_basket_outlined,
-              text: 'Products',
+              text: 'Receipts',
               active: appProvider.currentPage == DisplayedPage.PRODUCTS,
               onTap: () {
                 appProvider.changeCurrentPage(DisplayedPage.PRODUCTS);
                 locator<NavigationService>().navigateTo(ProductsRoute);
               },
             ),
+
             SideMenuItemDesktop(
               icon: Icons.category,
-              text: 'Categories',
-              active: appProvider.currentPage == DisplayedPage.CATEGORIES,
-              onTap: () {
-                appProvider.changeCurrentPage(DisplayedPage.CATEGORIES);
-                locator<NavigationService>().navigateTo(CategoriesRoute);
-              },
-            ),
-            SideMenuItemDesktop(
-              icon: Icons.category,
-              text: 'Brands',
+              text: 'Example',
               active: appProvider.currentPage == DisplayedPage.BRANDS,
               onTap: () {
                 appProvider.changeCurrentPage(DisplayedPage.BRANDS);
