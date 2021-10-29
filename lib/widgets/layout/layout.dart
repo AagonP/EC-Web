@@ -12,6 +12,9 @@ import '../navbar/navigation_bar.dart';
 class LayoutTemplate extends StatelessWidget {
   final GlobalKey<ScaffoldState> _key = GlobalKey<ScaffoldState>();
 
+  
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

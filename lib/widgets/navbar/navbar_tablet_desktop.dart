@@ -1,7 +1,13 @@
 import 'package:ecommerce_admin_tut/helpers/app_colors.dart';
 import 'package:ecommerce_admin_tut/widgets/custom_text.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'dart:math';
+var rng = new Random();
+
+User user = FirebaseAuth.instance.currentUser;
 
 
 class NavigationTabletDesktop extends StatelessWidget {
@@ -62,10 +68,10 @@ class NavigationTabletDesktop extends StatelessWidget {
                 children: [
                   CircleAvatar(
                     radius: 14,
-                    backgroundImage: AssetImage('images/profile.jpg'),
+                    backgroundImage: NetworkImage('https://robohash.org/${rng.nextInt(100).toString()}'),
                   ),
                   SizedBox(width: 5,),
-                  CustomText(text: 'Santos Enoque',),
+                  CustomText(text: user != null ? user.email : "Admin",),
                   IconButton(
                     icon: Icon(Icons.keyboard_arrow_down),
                     onPressed: (){

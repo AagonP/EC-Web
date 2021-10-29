@@ -4,7 +4,7 @@ import 'package:ecommerce_admin_tut/models/user.dart';
 
 class UserServices {
   String adminsCollection = "admins";
-  String usersCollection = "users";
+  String usersCollection = "foods";
 
   void createAdmin({
     String id,

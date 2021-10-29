@@ -14,11 +14,17 @@ import 'locator.dart';
 
 void main() {
   setupLocator();
-  runApp(MultiProvider(providers: [
-    ChangeNotifierProvider.value(value: AppProvider.init()),
-    ChangeNotifierProvider.value(value: AuthProvider.initialize()),
-    ChangeNotifierProvider.value(value: TablesProvider.init()),
-  ], child: MyApp()));
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider.value(value: AppProvider.init()),
+        ChangeNotifierProvider.value(value: AuthProvider.initialize()),
+        // ChangeNotifierProvider.value(value: TablesProvider()),
+        ChangeNotifierProvider<TablesProvider>(create: (_) => TablesProvider(),)
+      ],
+      child: MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {

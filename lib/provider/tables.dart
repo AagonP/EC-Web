@@ -2,21 +2,22 @@ import 'dart:math';
 
 import 'package:ecommerce_admin_tut/models/brands.dart';
 import 'package:ecommerce_admin_tut/models/categories.dart';
+import 'package:ecommerce_admin_tut/models/foods.dart';
 import 'package:ecommerce_admin_tut/models/orders.dart';
 import 'package:ecommerce_admin_tut/models/products.dart';
-import 'package:ecommerce_admin_tut/models/user.dart';
 import 'package:ecommerce_admin_tut/services/brands.dart';
 import 'package:ecommerce_admin_tut/services/categories.dart';
+import 'package:ecommerce_admin_tut/services/foods.dart';
 import 'package:ecommerce_admin_tut/services/orders.dart';
 import 'package:ecommerce_admin_tut/services/products.dart';
-import 'package:ecommerce_admin_tut/services/user.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:responsive_table/DatatableHeader.dart';
 
 class TablesProvider with ChangeNotifier {
   // ANCHOR table headers
-  List<DatatableHeader> usersTableHeader = [
+
+  List<DatatableHeader> foodsTableHeader = [
     DatatableHeader(
         text: "ID",
         value: "id",
@@ -24,15 +25,40 @@ class TablesProvider with ChangeNotifier {
         sortable: true,
         textAlign: TextAlign.left),
     DatatableHeader(
-        text: "Name",
-        value: "name",
+        text: "Categories",
+        value: "categories",
+        show: true,
+        sortable: true,
+        textAlign: TextAlign.left),
+    DatatableHeader(
+        text: "Description",
+        value: "description",
         show: true,
         flex: 2,
         sortable: true,
         textAlign: TextAlign.left),
     DatatableHeader(
-        text: "Email",
-        value: "email",
+        text: "Image URL",
+        value: "imageURL",
+        flex: 2,
+        show: true,
+        sortable: true,
+        textAlign: TextAlign.left),
+    DatatableHeader(
+        text: "Price",
+        value: "price",
+        show: true,
+        sortable: true,
+        textAlign: TextAlign.left),
+    DatatableHeader(
+        text: "Title",
+        value: "title",
+        show: true,
+        sortable: true,
+        textAlign: TextAlign.left),
+    DatatableHeader(
+        text: "Store Id",
+        value: "store_id",
         show: true,
         sortable: true,
         textAlign: TextAlign.left),
@@ -191,7 +217,7 @@ class TablesProvider with ChangeNotifier {
   int currentPerPage;
   int currentPage = 1;
   bool isSearch = false;
-  List<Map<String, dynamic>> usersTableSource = [];
+  List<Map<String, dynamic>> foodsTableSource = [];
   List<Map<String, dynamic>> ordersTableSource = [];
   List<Map<String, dynamic>> productsTableSource = [];
   List<Map<String, dynamic>> categoriesTableSource = [];
@@ -205,9 +231,9 @@ class TablesProvider with ChangeNotifier {
   bool isLoading = true;
   bool showSelect = true;
 
-  UserServices _userServices = UserServices();
-  List<UserModel> _users = <UserModel>[];
-  List<UserModel> get users => _users;
+  FoodsServices _foodServices = FoodsServices();
+  List<FoodModel> _foods = <FoodModel>[];
+  // List<UserModel> get users => _foods;
 
   OrderServices _orderServices = OrderServices();
   List<OrderModel> _orders = <OrderModel>[];
@@ -223,14 +249,19 @@ class TablesProvider with ChangeNotifier {
   BrandsServices _brandsServices = BrandsServices();
   List<BrandModel> _brands = <BrandModel>[];
 
+  String _storeId = '';
+  String get storeId => _storeId;
+
   Future _loadFromFirebase() async {
-    // _users = await _userServices.getAllUsers();
+    _foods = await _foodServices.getAll();
+    getStoreId();
     // _orders = await _orderServices.getAllOrders();
     // _products = await _productsServices.getAllProducts();
-    _brands = await _brandsServices.getAll();
+    // _brands = await _brandsServices.getAll();
     // _categories = await _categoriesServices.getAll();
   }
 
+  // Start Example
   void addStoreData(BrandModel brandModel) async{
     /// add store to database
     await _brandsServices.addStore(brandModel);
@@ -266,19 +297,72 @@ class TablesProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  // End Example
+
+  // Food helper function
+  void addFoodData(FoodModel foodModel) async{
+    /// add store to database
+    await _foodServices.addFood(foodModel);
+    _foods.clear();
+    foodsTableSource.clear();
+    notifyListeners();
+    _foods = await _foodServices.getAll();
+    // await _loadFromFirebase();
+    foodsTableSource.addAll(_getFoodsData());
+    notifyListeners();
+  }
+
+  void deleteFoodData(List<Map<String, dynamic>> map) async {
+    /// Delete selected store items
+    _foods.clear();
+    foodsTableSource.clear();
+    notifyListeners();
+    map.forEach((Map<String, dynamic> e) async {
+      await _foodServices.deleteFood(e['id']);
+    });
+    _foods = await _foodServices.getAll();
+    // await _loadFromFirebase();
+    foodsTableSource.addAll(_getFoodsData());
+    notifyListeners();
+  }
+
+  void updateFoodData(String id, FoodModel foodModel) async{
+    /// Update selected item
+    _foods.clear();
+    foodsTableSource.clear();
+    notifyListeners();
+    await _foodServices.updateFood(id, foodModel);
+    _foods = await _foodServices.getAll();
+    // await _loadFromFirebase();
+    foodsTableSource.addAll(_getFoodsData());
+    notifyListeners();
+  }
+
+  void getStoreId() async {
+    String tem = await _foodServices.getStoreID();
+    _storeId = tem;
+    notifyListeners();
+  }
+
+  // End Food Helper function
+
   // TODO: add function here to manipulate table
 
-  List<Map<String, dynamic>> _getUsersData() {
+  List<Map<String, dynamic>> _getFoodsData() {
     isLoading = true;
     notifyListeners();
     List<Map<String, dynamic>> temps = [];
-    var i = _users.length;
+    var i = _foods.length;
     print(i);
-    for (UserModel userData in _users) {
+    for (FoodModel foodData in _foods) {
       temps.add({
-        "id": userData.id,
-        "email": userData.email,
-        "name": userData.name,
+        "id": foodData.id,
+        'categories': foodData.categories,
+        'description': foodData.description,
+        'imageURL': foodData.imageUrl,
+        'price': foodData.price,
+        'title': foodData.title,
+        'store_id': foodData.storeId,
       });
       i++;
     }
@@ -347,11 +431,11 @@ class TablesProvider with ChangeNotifier {
     return temps;
   }
 
-  _initData() async {
+  initData() async {
     isLoading = true;
     notifyListeners();
     await _loadFromFirebase();
-    usersTableSource.addAll(_getUsersData());
+    foodsTableSource.addAll(_getFoodsData());
     ordersTableSource.addAll(_getOrdersData());
     productsTableSource.addAll(_getProductsData());
     categoriesTableSource.addAll(_getCategoriesData());
@@ -365,10 +449,10 @@ class TablesProvider with ChangeNotifier {
     sortColumn = value;
     sortAscending = !sortAscending;
     if (sortAscending) {
-      usersTableSource
+      foodsTableSource
           .sort((a, b) => b["$sortColumn"].compareTo(a["$sortColumn"]));
     } else {
-      usersTableSource
+      foodsTableSource
           .sort((a, b) => a["$sortColumn"].compareTo(b["$sortColumn"]));
     }
     notifyListeners();
@@ -386,7 +470,7 @@ class TablesProvider with ChangeNotifier {
 
   onSelectAll(bool value) {
     if (value) {
-      selecteds = usersTableSource.map((entry) => entry).toList().cast();
+      selecteds = foodsTableSource.map((entry) => entry).toList().cast();
     } else {
       selecteds.clear();
     }
@@ -408,7 +492,7 @@ class TablesProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  TablesProvider.init() {
-    _initData();
+  TablesProvider() {
+    initData();
   }
 }

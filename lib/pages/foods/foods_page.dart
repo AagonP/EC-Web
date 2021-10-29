@@ -1,5 +1,7 @@
 import 'dart:math';
 
+import 'package:ecommerce_admin_tut/pages/foods/AddButton.dart';
+import 'package:ecommerce_admin_tut/pages/foods/EditButton.dart';
 import 'package:ecommerce_admin_tut/provider/tables.dart';
 import 'package:ecommerce_admin_tut/widgets/page_header.dart';
 import 'package:flutter/material.dart';
@@ -27,7 +29,7 @@ class _UsersPageState extends State<UsersPage> {
             mainAxisSize: MainAxisSize.max,
             children: [
           PageHeader(
-            text: 'USERS',
+            text: 'FOODS',
           ),
           Container(
             margin: EdgeInsets.all(10),
@@ -41,10 +43,40 @@ class _UsersPageState extends State<UsersPage> {
               clipBehavior: Clip.none,
               child: ResponsiveDatatable(
                 title: !tablesProvider.isSearch
-                    ? RaisedButton.icon(
-                        onPressed: () {},
-                        icon: Icon(Icons.add),
-                        label: Text("ADD CATEGORY"))
+                    ? Row(
+                        children: [
+                          // TODO: button
+                          AddFoodButton(
+                            color: Colors.teal,
+                            iconData: Icons.add,
+                            label: 'Add',
+                          ),
+                          SizedBox(
+                            width: 50,
+                          ),
+                          ElevatedButton.icon(
+                            icon: Icon(Icons.delete),
+                            onPressed: () {
+                              print('delete items');
+                              tablesProvider
+                                  .deleteFoodData(tablesProvider.selecteds);
+                            },
+                            label: Text("Delete Item"),
+                            style: ButtonStyle(
+                              backgroundColor: MaterialStateProperty.all<Color>(
+                                  Colors.redAccent),
+                            ),
+                          ),
+                          SizedBox(
+                            width: 50,
+                          ),
+                          EditFoodButton(
+                            color: Colors.blueAccent,
+                            iconData: Icons.edit,
+                            label: 'Edit',
+                          ),
+                        ],
+                      )
                     : null,
                 actions: [
                   if (tablesProvider.isSearch)
@@ -70,8 +102,8 @@ class _UsersPageState extends State<UsersPage> {
                           });
                         })
                 ],
-                headers: tablesProvider.usersTableHeader,
-                source: tablesProvider.usersTableSource,
+                headers: tablesProvider.foodsTableHeader,
+                source: tablesProvider.foodsTableSource,
                 selecteds: tablesProvider.selecteds,
                 showSelect: tablesProvider.showSelect,
                 autoHeight: false,

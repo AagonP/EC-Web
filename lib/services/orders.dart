@@ -6,7 +6,7 @@ class OrderServices {
   String collection = "stores";
 
   Future<List<OrderModel>> getAllOrders() async {
-    print("get all orders");
+    print("get all order");
     List<OrderModel> orders = [];
     await FirebaseFirestore.instance
         .collection(collection)
