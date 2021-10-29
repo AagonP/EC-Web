@@ -29,7 +29,7 @@ class _UsersPageState extends State<UsersPage> {
             mainAxisSize: MainAxisSize.max,
             children: [
           PageHeader(
-            text: 'FOODS',
+            text: 'Foods',
           ),
           Container(
             margin: EdgeInsets.all(10),
