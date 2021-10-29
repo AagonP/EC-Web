@@ -38,7 +38,7 @@ class _OrdersPageState extends State<OrdersPage> {
             mainAxisSize: MainAxisSize.max,
             children: [
           PageHeader(
-            text: 'Receipts',
+            text: 'Orders',
           ),
           Container(
             margin: EdgeInsets.all(20),
