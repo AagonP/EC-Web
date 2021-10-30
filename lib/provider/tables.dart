@@ -1,10 +1,12 @@
 import 'dart:math';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ecommerce_admin_tut/models/brands.dart';
 import 'package:ecommerce_admin_tut/models/categories.dart';
 import 'package:ecommerce_admin_tut/models/foods.dart';
 import 'package:ecommerce_admin_tut/models/orders.dart';
 import 'package:ecommerce_admin_tut/models/products.dart';
+import 'package:ecommerce_admin_tut/models/top_users.dart';
 import 'package:ecommerce_admin_tut/services/brands.dart';
 import 'package:ecommerce_admin_tut/services/categories.dart';
 import 'package:ecommerce_admin_tut/services/foods.dart';
@@ -238,14 +240,57 @@ class TablesProvider with ChangeNotifier {
 
   FoodsServices _foodServices = FoodsServices();
   List<FoodModel> _foods = <FoodModel>[];
-  // List<UserModel> get users => _foods;
+
+  List<FoodModel> get foods => _foods;
 
   OrderServices _orderServices = OrderServices();
   List<OrderModel> _orders = <OrderModel>[];
+
   List<OrderModel> get orders => _orders;
+
+  Map<String, String> _uidNameMap = {};
+
+  List<OrderModel> _ordersThisMonth = <OrderModel>[];
+
+  List<OrderModel> get ordersThisMonth => _ordersThisMonth;
+
+  double get revenueThisMonth => _ordersThisMonth.fold(
+      0, (sum, element) => sum + double.parse(element.amount));
+
+  List<TopUserModel> get topUsersThisMonth {
+    List<TopUserModel> temp = [];
+
+    List<String> uIds = _ordersThisMonth.map((e) => e.uid).toList();
+    uIds = uIds.toSet().toList();
+
+    if (uIds.length > 8) {
+      uIds.removeRange(8, uIds.length);
+    }
+
+    temp = uIds.map((e) => TopUserModel(e, _uidNameMap[e], 0.0, 0)).toList();
+
+    for (TopUserModel userModel in temp) {
+      for (OrderModel order in _ordersThisMonth) {
+        if (order.uid == userModel.uid) {
+          userModel.spends += double.parse(order.amount);
+          userModel.numOrders++;
+        }
+      }
+    }
+    temp.sort((b, a) {
+      return a.spends < b.spends
+          ? -1
+          : a.spends > b.spends
+              ? 1
+              : 0;
+    });
+
+    return temp;
+  }
 
   ProductsServices _productsServices = ProductsServices();
   List<ProductModel> _products = <ProductModel>[];
+
   List<ProductModel> get products => _products;
 
   CategoriesServices _categoriesServices = CategoriesServices();
@@ -254,9 +299,21 @@ class TablesProvider with ChangeNotifier {
   BrandsServices _brandsServices = BrandsServices();
   List<BrandModel> _brands = <BrandModel>[];
   String _storeId = '';
+
   String get storeId => _storeId;
+
+  void extractOrdersThisMonth(List<OrderModel> orders) {
+    String currentMonth = DateTime.now().month.toString();
+    for (OrderModel order in orders) {
+      if (order.created_time.split("-")[1] == currentMonth) {
+        _ordersThisMonth.add(order);
+      }
+    }
+  }
+
   Future refreshReceipts() async {
     _orders = await _orderServices.getAllOrders();
+    extractOrdersThisMonth(_orders);
     ordersTableSource.clear();
     ordersTableSource.addAll(_getOrdersData());
     notifyListeners();
@@ -274,6 +331,16 @@ class TablesProvider with ChangeNotifier {
     getStoreId();
     // _users = await _userServices.getAllUsers();
     _orders = await _orderServices.getAllOrders();
+    // Extract usernames
+    await FirebaseFirestore.instance
+        .collection("users")
+        .get()
+        .then((QuerySnapshot querySnapshot) {
+      querySnapshot.docs.forEach((doc) {
+        _uidNameMap[doc.id] = doc.data()["username"];
+      });
+    });
+    extractOrdersThisMonth(_orders);
     // _products = await _productsServices.getAllProducts();
     // _brands = await _brandsServices.getAll();
     // _categories = await _categoriesServices.getAll();

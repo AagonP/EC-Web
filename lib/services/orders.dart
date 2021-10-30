@@ -6,6 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 class OrderServices {
   String collection = "receipts";
 
+
   Future<String> getStoreID() async {
     String uid = FirebaseAuth.instance.currentUser.uid;
     String store_id;
@@ -39,9 +40,10 @@ class OrderServices {
         final created_time = order.data()['created_time'].toString();
         final payment_type = order.data()['payment_type'];
         final description = order.data()['description'];
+        final uid = order.data()['uid'];
         print(is_processed);
         orders.add(OrderModel(amount, is_processed, nonce, description,
-            created_time, payment_type));
+            created_time, payment_type, uid));
       }
     });
     print("end get all receipts");
@@ -65,9 +67,10 @@ class OrderServices {
         final created_time = order.data()['created_time'].toString();
         final payment_type = order.data()['payment_type'];
         final description = order.data()['description'];
+        final uid = order.data()['uid'];
         print(is_processed);
         orders.add(OrderModel(amount, is_processed, nonce, description,
-            created_time, payment_type));
+            created_time, payment_type, uid));
       }
     });
     print("end get all receipts");

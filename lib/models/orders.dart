@@ -7,6 +7,15 @@ class OrderModel {
   final String description;
   final String created_time;
   final String payment_time;
-  OrderModel(this.amount, this.is_processed, this.nonce, this.description,
-      this.created_time, this.payment_time);
+  final String uid;
+
+  OrderModel(
+    this.amount,
+    this.is_processed,
+    this.nonce,
+    this.description,
+    this.created_time,
+    this.payment_time,
+    this.uid,
+  );
 }
