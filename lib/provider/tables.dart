@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ecommerce_admin_tut/models/brands.dart';
 import 'package:ecommerce_admin_tut/models/categories.dart';
@@ -13,7 +11,6 @@ import 'package:ecommerce_admin_tut/services/foods.dart';
 import 'package:ecommerce_admin_tut/services/orders.dart';
 import 'package:ecommerce_admin_tut/services/products.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:responsive_table/DatatableHeader.dart';
 
 class TablesProvider with ChangeNotifier {
@@ -254,8 +251,37 @@ class TablesProvider with ChangeNotifier {
 
   List<OrderModel> get ordersThisMonth => _ordersThisMonth;
 
-  double get revenueThisMonth => _ordersThisMonth.fold(
-      0, (sum, element) => sum + double.parse(element.amount));
+  double get totalRevenueThisMonth =>
+      _ordersThisMonth.fold(
+          0, (sum, element) => sum + double.parse(element.amount));
+
+  List<double> get revenuesThisWeek {
+    List<double> temp = List.generate(7, (index) => 0.0);
+    int currentDay = 31;
+    int currentMonth = 10;
+    for (OrderModel order in _ordersThisMonth) {
+      List<String> orderDate = order.created_time.split("-");
+      if (int.parse(orderDate[1]) == currentMonth &&
+          int.parse(orderDate[0]) > currentDay - 7) {
+        temp[6 - (currentDay - int.parse(orderDate[0]))] += double.parse(order.amount);
+      }
+    }
+
+    return temp;
+  }
+
+  List<double> get revenuesThisMonth {
+    List<double> temp = List.generate(31, (index) => 0.0);
+    int currentMonth = 10;
+    for (OrderModel order in _ordersThisMonth) {
+      List<String> orderDate = order.created_time.split("-");
+      if (int.parse(orderDate[1]) == currentMonth) {
+        temp[int.parse(orderDate[0]) - 1] += double.parse(order.amount);
+      }
+    }
+
+    return temp;
+  }
 
   List<TopUserModel> get topUsersThisMonth {
     List<TopUserModel> temp = [];
@@ -281,8 +307,8 @@ class TablesProvider with ChangeNotifier {
       return a.spends < b.spends
           ? -1
           : a.spends > b.spends
-              ? 1
-              : 0;
+          ? 1
+          : 0;
     });
 
     return temp;
@@ -303,7 +329,8 @@ class TablesProvider with ChangeNotifier {
   String get storeId => _storeId;
 
   void extractOrdersThisMonth(List<OrderModel> orders) {
-    String currentMonth = DateTime.now().month.toString();
+    // String currentMonth = DateTime.now().month.toString();
+    String currentMonth = "10";
     for (OrderModel order in orders) {
       if (order.created_time.split("-")[1] == currentMonth) {
         _ordersThisMonth.add(order);

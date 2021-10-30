@@ -19,7 +19,7 @@ class CardsList extends StatelessWidget {
               icon: Icons.monetization_on_outlined,
               title: "Revenue",
               subtitle: "Revenue this month",
-              value: "\$ ${tablesProvider.revenueThisMonth}",
+              value: "\$ ${tablesProvider.totalRevenueThisMonth}",
               color1: Colors.green.shade700,
               color2: Colors.green,
             ),

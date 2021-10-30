@@ -13,8 +13,7 @@ class HomePageDesktop extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     TablesProvider tablesProvider = Provider.of<TablesProvider>(context);
-    List<TopUserModel> topUsersThisMonth =
-        tablesProvider.topUsersThisMonth;
+    List<TopUserModel> topUsersThisMonth = tablesProvider.topUsersThisMonth;
 
     return ListView(
       children: [
@@ -32,7 +31,7 @@ class HomePageDesktop extends StatelessWidget {
               SizedBox(
                   height: 600,
                   width: MediaQuery.of(context).size.width / 1.9,
-                  child: SalesChart()),
+                  child: SalesChart(tablesProvider: tablesProvider)),
               Container(
                 width: MediaQuery.of(context).size.width / 4,
                 height: 600,

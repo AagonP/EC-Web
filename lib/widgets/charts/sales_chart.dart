@@ -1,7 +1,16 @@
+import 'dart:math';
+
+import 'package:ecommerce_admin_tut/provider/tables.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
 class SalesChart extends StatefulWidget {
+  final TablesProvider tablesProvider;
+  final currentDay = 31;
+  final currentMonth = 10;
+
+  SalesChart({Key key, this.tablesProvider}) : super(key: key);
+
   @override
   State<StatefulWidget> createState() => SalesChartState();
 }
@@ -17,6 +26,9 @@ class SalesChartState extends State<SalesChart> {
 
   @override
   Widget build(BuildContext context) {
+    List<double> revenuesThisWeek = widget.tablesProvider.revenuesThisWeek;
+    List<double> revenuesThisMonth = widget.tablesProvider.revenuesThisMonth;
+
     return AspectRatio(
       aspectRatio: 1.23,
       child: Container(
@@ -40,7 +52,7 @@ class SalesChartState extends State<SalesChart> {
                   height: 37,
                 ),
                 const Text(
-                  'Unfold Shop 2018',
+                  'Sales chart',
                   style: TextStyle(
                     color: Color(0xff827daa),
                     fontSize: 16,
@@ -50,8 +62,8 @@ class SalesChartState extends State<SalesChart> {
                 const SizedBox(
                   height: 4,
                 ),
-                const Text(
-                  'Monthly Sales',
+                Text(
+                  isShowingMainData ? 'Sales this week' : 'Sales of this month',
                   style: TextStyle(
                       color: Colors.white,
                       fontSize: 32,
@@ -64,9 +76,11 @@ class SalesChartState extends State<SalesChart> {
                 ),
                 Expanded(
                   child: Padding(
-                    padding: const EdgeInsets.only(right: 16.0, left: 6.0),
+                    padding: EdgeInsets.fromLTRB(20, 0, 30, 0),
                     child: LineChart(
-                      isShowingMainData ? sampleData1() : sampleData2(),
+                      isShowingMainData
+                          ? sampleData1(widget.currentDay, revenuesThisWeek)
+                          : sampleData2(revenuesThisMonth),
                       swapAnimationDuration: const Duration(milliseconds: 250),
                     ),
                   ),
@@ -93,7 +107,7 @@ class SalesChartState extends State<SalesChart> {
     );
   }
 
-  LineChartData sampleData1() {
+  LineChartData sampleData1(int currentDay, List<double> revenuesThisWeek) {
     return LineChartData(
       lineTouchData: LineTouchData(
         touchTooltipData: LineTouchTooltipData(
@@ -116,15 +130,7 @@ class SalesChartState extends State<SalesChart> {
           ),
           margin: 10,
           getTitles: (value) {
-            switch (value.toInt()) {
-              case 2:
-                return 'SEPT';
-              case 7:
-                return 'OCT';
-              case 12:
-                return 'DEC';
-            }
-            return '';
+            return "${value.toInt().toString()}/${widget.currentMonth}";
           },
         ),
         leftTitles: SideTitles(
@@ -135,17 +141,10 @@ class SalesChartState extends State<SalesChart> {
             fontSize: 14,
           ),
           getTitles: (value) {
-            switch (value.toInt()) {
-              case 1:
-                return '1m';
-              case 2:
-                return '2m';
-              case 3:
-                return '3m';
-              case 4:
-                return '5m';
+            if (value.toInt() % 50 == 0) {
+              return "${value.toString()} \$";
             }
-            return '';
+            return "";
           },
           margin: 8,
           reservedSize: 30,
@@ -169,25 +168,20 @@ class SalesChartState extends State<SalesChart> {
           ),
         ),
       ),
-      minX: 0,
-      maxX: 14,
-      maxY: 4,
-      minY: 0,
-      lineBarsData: linesBarData1(),
+      minX: (currentDay - 6).toDouble(),
+      maxX: currentDay.toDouble(),
+      maxY: revenuesThisWeek.reduce(max),
+      minY: revenuesThisWeek.reduce(min),
+      lineBarsData: linesBarData1(revenuesThisWeek),
     );
   }
 
-  List<LineChartBarData> linesBarData1() {
+  List<LineChartBarData> linesBarData1(List<double> revenuesThisWeek) {
     final LineChartBarData lineChartBarData1 = LineChartBarData(
-      spots: [
-        FlSpot(1, 1),
-        FlSpot(3, 1.5),
-        FlSpot(5, 1.4),
-        FlSpot(7, 3.4),
-        FlSpot(10, 2),
-        FlSpot(12, 2.2),
-        FlSpot(13, 1.8),
-      ],
+      spots: List.generate(
+          revenuesThisWeek.length,
+          (index) => FlSpot((widget.currentDay - 6 + index).toDouble(),
+              revenuesThisWeek[index])),
       isCurved: true,
       colors: [
         const Color(0xff4af699),
@@ -201,57 +195,12 @@ class SalesChartState extends State<SalesChart> {
         show: false,
       ),
     );
-    final LineChartBarData lineChartBarData2 = LineChartBarData(
-      spots: [
-        FlSpot(1, 1),
-        FlSpot(3, 2.8),
-        FlSpot(7, 1.2),
-        FlSpot(10, 2.8),
-        FlSpot(12, 2.6),
-        FlSpot(13, 3.9),
-      ],
-      isCurved: true,
-      colors: [
-        const Color(0xffaa4cfc),
-      ],
-      barWidth: 8,
-      isStrokeCapRound: true,
-      dotData: FlDotData(
-        show: false,
-      ),
-      belowBarData: BarAreaData(show: false, colors: [
-        const Color(0x00aa4cfc),
-      ]),
-    );
-    final LineChartBarData lineChartBarData3 = LineChartBarData(
-      spots: [
-        FlSpot(1, 2.8),
-        FlSpot(3, 1.9),
-        FlSpot(6, 3),
-        FlSpot(10, 1.3),
-        FlSpot(13, 2.5),
-      ],
-      isCurved: true,
-      colors: const [
-        Color(0xff27b6fc),
-      ],
-      barWidth: 8,
-      isStrokeCapRound: true,
-      dotData: FlDotData(
-        show: false,
-      ),
-      belowBarData: BarAreaData(
-        show: false,
-      ),
-    );
     return [
       lineChartBarData1,
-      lineChartBarData2,
-      lineChartBarData3,
     ];
   }
 
-  LineChartData sampleData2() {
+  LineChartData sampleData2(List<double> revenuesThisMonth) {
     return LineChartData(
       lineTouchData: LineTouchData(
         enabled: false,
@@ -270,15 +219,9 @@ class SalesChartState extends State<SalesChart> {
           ),
           margin: 10,
           getTitles: (value) {
-            switch (value.toInt()) {
-              case 2:
-                return 'SEPT';
-              case 7:
-                return 'OCT';
-              case 12:
-                return 'DEC';
-            }
-            return '';
+            if (value.toInt() % 5 == 0)
+              return "${value.toInt().toString()}//${widget.currentMonth}";
+            return "";
           },
         ),
         leftTitles: SideTitles(
@@ -289,19 +232,10 @@ class SalesChartState extends State<SalesChart> {
             fontSize: 14,
           ),
           getTitles: (value) {
-            switch (value.toInt()) {
-              case 1:
-                return '1m';
-              case 2:
-                return '2m';
-              case 3:
-                return '3m';
-              case 4:
-                return '5m';
-              case 5:
-                return '6m';
+            if (value.toInt() % 50 == 0) {
+              return "${value.toString()} \$";
             }
-            return '';
+            return "";
           },
           margin: 8,
           reservedSize: 30,
@@ -324,26 +258,21 @@ class SalesChartState extends State<SalesChart> {
               color: Colors.transparent,
             ),
           )),
-      minX: 0,
-      maxX: 14,
-      maxY: 6,
-      minY: 0,
-      lineBarsData: linesBarData2(),
+      minX: 1,
+      maxX: 31,
+      maxY: revenuesThisMonth.reduce(max),
+      minY: revenuesThisMonth.reduce(min),
+      lineBarsData: linesBarData2(revenuesThisMonth),
     );
   }
 
-  List<LineChartBarData> linesBarData2() {
+  List<LineChartBarData> linesBarData2(List<double> revenuesThisMonth) {
     return [
       LineChartBarData(
-        spots: [
-          FlSpot(1, 1),
-          FlSpot(3, 4),
-          FlSpot(5, 1.8),
-          FlSpot(7, 5),
-          FlSpot(10, 2),
-          FlSpot(12, 2.2),
-          FlSpot(13, 1.8),
-        ],
+        spots: List.generate(
+            revenuesThisMonth.length,
+            (index) =>
+                FlSpot((index + 1).toDouble(), revenuesThisMonth[index])),
         isCurved: true,
         curveSmoothness: 0,
         colors: const [
@@ -354,51 +283,9 @@ class SalesChartState extends State<SalesChart> {
         dotData: FlDotData(
           show: false,
         ),
-        belowBarData: BarAreaData(
-          show: false,
-        ),
-      ),
-      LineChartBarData(
-        spots: [
-          FlSpot(1, 1),
-          FlSpot(3, 2.8),
-          FlSpot(7, 1.2),
-          FlSpot(10, 2.8),
-          FlSpot(12, 2.6),
-          FlSpot(13, 3.9),
-        ],
-        isCurved: true,
-        colors: const [
-          Color(0x99aa4cfc),
-        ],
-        barWidth: 4,
-        isStrokeCapRound: true,
-        dotData: FlDotData(
-          show: false,
-        ),
         belowBarData: BarAreaData(show: true, colors: [
           const Color(0x33aa4cfc),
         ]),
-      ),
-      LineChartBarData(
-        spots: [
-          FlSpot(1, 3.8),
-          FlSpot(3, 1.9),
-          FlSpot(6, 5),
-          FlSpot(10, 3.3),
-          FlSpot(13, 4.5),
-        ],
-        isCurved: true,
-        curveSmoothness: 0,
-        colors: const [
-          Color(0x4427b6fc),
-        ],
-        barWidth: 2,
-        isStrokeCapRound: true,
-        dotData: FlDotData(show: true),
-        belowBarData: BarAreaData(
-          show: false,
-        ),
       ),
     ];
   }
