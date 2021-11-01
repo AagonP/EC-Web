@@ -340,6 +340,7 @@ class TablesProvider with ChangeNotifier {
 
   Future refreshReceipts() async {
     _orders = await _orderServices.getAllOrders();
+    _ordersThisMonth.clear();
     extractOrdersThisMonth(_orders);
     ordersTableSource.clear();
     ordersTableSource.addAll(_getOrdersData());
